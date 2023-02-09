@@ -25,7 +25,7 @@ internal fun Dp.toPx(): Float {
  * 算出该点与水平的角度的值，用移动点角度减去起始点角度就是旋转角度。
  */
 fun getRotate(x1: Double, y1: Double, x2: Double, y2: Double, centerX: Double, centerY: Double): Double {
-    Log.d("getRotateAngle", "x1=$x1,y1=$y1,x2=$x2,y2=$y2,centerX=$centerX,centerY=$centerY")
+//    Log.d("getRotateAngle", "x1=$x1,y1=$y1,x2=$x2,y2=$y2,centerX=$centerX,centerY=$centerY")
     val abx: Double = centerX - x1
     val aby: Double = centerY - y1
     val acx: Double = centerX - x2
@@ -36,10 +36,10 @@ fun getRotate(x1: Double, y1: Double, x2: Double, y2: Double, centerX: Double, c
     val b = Math.hypot(acx, acy)
     val a = Math.hypot(bcx, bcy)
     var cos1 = (c * c + b * b - a * a) / (2 * b * c)
-    Log.i("TAG", "c == $c")
-    Log.i("TAG", "b == $b")
-    Log.i("TAG", "a == $a")
-    Log.i("TAG", "cos == $cos1")
+//    Log.i("TAG", "c == $c")
+//    Log.i("TAG", "b == $b")
+//    Log.i("TAG", "a == $a")
+//    Log.i("TAG", "cos == $cos1")
     if (cos1 >= 1) {
         cos1 = 1.0
     }
@@ -55,7 +55,7 @@ fun getRotate(x1: Double, y1: Double, x2: Double, y2: Double, centerX: Double, c
 fun getVertyRegion(
     circleSize: Dp,
     regionCircleList: List<Region>
-): List<Region> {
+) {
     // 默认 外圈放大倍数
     val scale = 3f
     // 外圈区域
@@ -90,10 +90,6 @@ fun getVertyRegion(
     )
     regionCircleList[0].setPath(verityCirclePathOut.asAndroidPath(), Region(verityRegionRect))
     regionCircleList[1].setPath(verityCirclePathIn.asAndroidPath(), Region(verityRegionRect))
-
-    Log.d("verityCircle", "JoJo  设置 >>>  regionCircleList[0] = ${regionCircleList[0]}")
-    Log.d("verityCircle", "JoJo  设置 >>>  regionCircleList[1] = ${regionCircleList[1]}")
-    return regionCircleList
 }
 
 
@@ -102,8 +98,6 @@ fun getVertyRegion(
  */
 fun verityCircle(regionCircleList: List<Region>, x: Float, y: Float): Boolean {
     val verity: Boolean
-    Log.d("verityCircle", "JoJo  >>>  regionCircleList[0] = ${regionCircleList[0]}")
-    Log.d("verityCircle", "JoJo  >>>  regionCircleList[1] = ${regionCircleList[1]}")
     if (regionCircleList[0].contains(x.toInt(), y.toInt())) {
         Log.d("verityCircle", "外圈区域 >> 通过")
         if (regionCircleList[1].contains(x.toInt(), y.toInt())) {

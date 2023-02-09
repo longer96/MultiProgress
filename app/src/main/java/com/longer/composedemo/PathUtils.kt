@@ -2,7 +2,6 @@ package com.longer.composedemo
 
 import android.graphics.Path
 import android.graphics.PathMeasure
-import android.graphics.RectF
 
 /**
  * @Author: longer
@@ -10,20 +9,13 @@ import android.graphics.RectF
  * @Description:  通过转化为Android 从而使用pathMeasure。 compose pathMeasure api 只有1个
  */
 class PathUtils {
-    private var startAngle: Float = 0f
     private var path : Path? = null
-
 
     private val totalLength : Float
         get() {
             val pathMeasure = getPathMeasure()
             return pathMeasure.length
         }
-
-
-    fun setStartAngle(startAngle: Float) {
-        this.startAngle = startAngle
-    }
 
     fun setPath(path: Path) {
         this.path = path
@@ -48,7 +40,7 @@ class PathUtils {
     }
 
 
-    // 构建单例
+    // 构建单例 todo
     companion object {
         val instance: PathUtils by lazy(mode = LazyThreadSafetyMode.SYNCHRONIZED){
             PathUtils()

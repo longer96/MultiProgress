@@ -30,6 +30,10 @@ import android.graphics.Path.Direction
  * @Author: longer
  * @Date: 2023-01-11 20:58
  * @Description: 可触摸的圆形进度条
+ * @todo:
+ * 1. 获取布局约束
+ * 2：减少 pathMeasure 计算
+ * 3：可以设置角度和形状
  */
 @Composable
 fun TouchCircleProgress(
@@ -43,7 +47,7 @@ fun TouchCircleProgress(
     processColor: Color = Color(0xFF00BFFF),
     // 进度条的进度
     startProcess: Float = 0f,
-    // 开始角度 todo 暂时不支持，因为滑动的时候不好计算
+    // 开始角度 todo 暂时不支持，因为滑动的时候不好计算，目前都以12点方向为起始点
 //    startAngle: Float = 0f,
     // 触摸点图片大小（为空，默认为线宽度的1.3倍）
     touchImgSize: Dp? = null,
@@ -65,16 +69,16 @@ fun TouchCircleProgress(
 
     // 触摸点的位置信息
     var touchPosition: FloatArray
-    // 触摸点的区域
+    // 触摸点的区域 触摸图标的位置 + 触摸图标的大小
     val regionTouch = remember { Region() }
     var regionTouchVerify = false
 
-    // 可拖动区域
+    // 可拖动区域 内外圈
     val regionCircleList = listOf(
         Region(),
         Region()
     )
-    getVertyRegion(circleSize, regionCircleList)
+
     // 触摸事件num,当变动之后，就不在消费事件
     val dragNumber = remember { mutableStateOf(0) }
 
@@ -83,6 +87,8 @@ fun TouchCircleProgress(
 
     // 标记是否快结束
     val isNearlyFinish = remember { mutableStateOf(false) }
+
+    getVertyRegion(circleSize, regionCircleList)
 
     Box(
         contentAlignment = Alignment.Center,
@@ -306,7 +312,7 @@ fun DefaultPreview() {
             circleSize = 200.dp,
             startProcess = 0.2f,
             progressWidth = 20.dp,
-            touchImgSize = 60.dp,
+            touchImgSize = 42.dp,
             startDirection = Direction.CCW,
             onProcessFinish = {
                 Log.d("TouchCircleProgress", "onProcessFinish")
