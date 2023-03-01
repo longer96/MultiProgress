@@ -51,9 +51,7 @@ class MainActivity : ComponentActivity() {
 fun Greeting(name: String) {
 
     //进度条进度
-    var progress = remember {
-        mutableStateOf(0.1f)
-    }
+    val progress = remember { mutableStateOf(0.1f) }
     Column(
         modifier = Modifier
             .fillMaxSize()

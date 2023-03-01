@@ -24,6 +24,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import android.graphics.Path.Direction
+import androidx.compose.ui.geometry.RoundRect
 
 
 /**
@@ -98,39 +99,39 @@ fun TouchCircleProgress(
             .pointerInput(dragNumber.value) {
                 detectDragGestures(
                     onDragStart = { offset ->
-                        Log.i("TouchCircleProgress", ">>  onDragStart  regionTouch >> $regionTouch")
+                        LogUtils.d(">>  onDragStart  regionTouch >> $regionTouch")
                         if (!regionTouch.contains(offset.x.toInt(), offset.y.toInt())) {
-                            Log.d("TouchCircleProgress", ">>  detectTapGestures: 不在区域内")
+                            LogUtils.d(">>  detectTapGestures: 不在区域内")
                             regionTouchVerify = false
                         } else {
-                            Log.d("TouchCircleProgress", ">>  detectTapGestures: 在区域内")
+                            LogUtils.d(">>  detectTapGestures: 在区域内")
                             regionTouchVerify = true
                         }
                     },
                     onDragEnd = {
-                        Log.i("TouchCircleProgress", ">>  onDragEnd")
+                        LogUtils.d(">>  onDragEnd")
                         regionTouchVerify = false
                     },
                     onDragCancel = {
-                        Log.i("TouchCircleProgress", ">>  onDragCancel")
+                        LogUtils.d(">>  onDragCancel")
                         regionTouchVerify = false
                     },
                     onDrag = { change, _ ->
                         val offset = change.position
                         if (!regionTouchVerify) {
-                            Log.d("TouchCircleProgress", "拖动点 不在触摸区域内，不处理，不在消耗事件")
+                            LogUtils.d("拖动点 不在触摸区域内，不处理，不在消耗事件")
                             dragNumber.value++
                             return@detectDragGestures
                         }
 
                         // 验证是不是在圆形区域内, 不在就不处理
                         if (!verityCircle(regionCircleList, offset.x, offset.y)) {
-                            Log.d("TouchCircleProgress", "不在触摸区域内，不处理，不在消耗事件")
+                            LogUtils.d("不在触摸区域内，不处理，不在消耗事件")
                             dragNumber.value++
                             return@detectDragGestures
                         }
 
-                        Log.i("TouchCircleProgress", ">>  detectTapGestures: $offset")
+                        LogUtils.d(">>  detectTapGestures: $offset")
 
                         // 设置时针方向
                         if (process.value < 0.2f) {
@@ -151,30 +152,30 @@ fun TouchCircleProgress(
                             centerY = (circleSize.toPx() / 2).toDouble()
                         )
 
-                        Log.i("TouchCircleProgress", "得到的角度: $rotateAngle")
+                        LogUtils.d("得到的角度: $rotateAngle")
 
                         if (direction.value == Direction.CW) {
                             // 顺时针
                             if (offset.x < circleSize.toPx() / 2) {
                                 rotateAngle = 180f - rotateAngle + 180f
-                                Log.i("TouchCircleProgress", "顺时针 > 补偿180度之后: $rotateAngle")
+                                LogUtils.d("顺时针 > 补偿180度之后: $rotateAngle")
                             }
                         } else {
                             // 逆时针
                             if (offset.x > circleSize.toPx() / 2) {
                                 rotateAngle = 180f - rotateAngle + 180f
-                                Log.i("TouchCircleProgress", "逆时针 > 补偿180度之后: $rotateAngle")
+                                LogUtils.d("逆时针 > 补偿180度之后: $rotateAngle")
                             }
                         }
                         process.value = (rotateAngle / 360f).toFloat()
 
-                        Log.d("TouchCircleProgress", ">>  当前进度 process: ${process.value}")
+                        LogUtils.d(">>  当前进度 process: ${process.value}")
 
                         // 有时候拉的太快会监听不到，优化进度监听
                         // 进度超过75%，记录一下，如果之后进度小于25%就算通过
                         // 如果低于75%，也记录，清除快完成的标记
                         if (process.value < 0.25f && isNearlyFinish.value) {
-                            Log.d("TouchCircleProgress", "拖动完成 >>> ")
+                            LogUtils.d("拖动完成 >>> ")
                             dragNumber.value++
                             onProcessFinish()
                             isNearlyFinish.value = false
@@ -193,7 +194,7 @@ fun TouchCircleProgress(
                 )
             },
     ) {
-        Log.d("TouchCircleProgress", "circleSize = ${circleSize.toPx()}px")
+        LogUtils.d("circleSize = ${circleSize.toPx()}px")
 
 
         // 触摸点图片大小（为空，默认为线宽度的1.3倍）
@@ -212,6 +213,14 @@ fun TouchCircleProgress(
                 0f - 90f + startAngle,
                 sweepAngle,
             )
+        }
+
+        val roundRect = RoundRect(
+            rect,
+
+        )
+        Path().apply {
+            addPath(circlePath)
         }
 
         // 通过计算path length画圆
@@ -260,7 +269,7 @@ fun TouchCircleProgress(
         val pathUtils = PathUtils.instance
         pathUtils.setPath(circlePath.asAndroidPath())
         touchPosition = pathUtils.getStartPosition(process.value)
-        Log.d("TouchCircleProgress", "pos[0] = ${touchPosition[0]}, pos[1] = ${touchPosition[1]}")
+        LogUtils.d("pos[0] = ${touchPosition[0]}, pos[1] = ${touchPosition[1]}")
 
 
         // 设置触摸区域
@@ -273,7 +282,7 @@ fun TouchCircleProgress(
 
 
         Canvas(modifier = Modifier.size(circleSize)) {
-            Log.d("TouchCircleProgress", "canvas size = $size")
+            LogUtils.d("canvas size = $size")
 
             // 背景圆
             drawPath(
@@ -315,7 +324,7 @@ fun DefaultPreview() {
             touchImgSize = 42.dp,
             startDirection = Direction.CCW,
             onProcessFinish = {
-                Log.d("TouchCircleProgress", "onProcessFinish")
+                LogUtils.d("onProcessFinish")
             }
         )
     }
