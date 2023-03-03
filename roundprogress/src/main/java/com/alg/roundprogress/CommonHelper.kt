@@ -1,4 +1,4 @@
-package com.longer.composedemo
+package com.alg.roundprogress
 
 import android.graphics.Region
 import androidx.compose.runtime.Composable
@@ -98,16 +98,16 @@ fun getVertyRegion(
 fun verityCircle(regionCircleList: List<Region>, x: Float, y: Float): Boolean {
     val verity: Boolean
     if (regionCircleList[0].contains(x.toInt(), y.toInt())) {
-        LogUtils.d( "外圈区域 >> 通过")
+        LogUtils.d("外圈区域 >> 通过")
         if (regionCircleList[1].contains(x.toInt(), y.toInt())) {
-            LogUtils.d( "内圈区域 >> 不通过")
+            LogUtils.d("内圈区域 >> 不通过")
             verity = false
         } else {
-            LogUtils.d( "内圈区域 >> 通过")
+            LogUtils.d("内圈区域 >> 通过")
             verity = true
         }
     } else {
-        LogUtils.d( "外圈区域 >> 未通过")
+        LogUtils.d("外圈区域 >> 未通过")
         verity = false
     }
     return verity

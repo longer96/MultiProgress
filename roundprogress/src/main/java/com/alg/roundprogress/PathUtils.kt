@@ -1,4 +1,4 @@
-package com.longer.composedemo
+package com.alg.roundprogress
 
 import android.graphics.Path
 import android.graphics.PathMeasure

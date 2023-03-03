@@ -1,7 +1,6 @@
-package com.longer.composedemo
+package com.alg.roundprogress
 
 import android.graphics.Region
-import android.util.Log
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectDragGestures
@@ -14,7 +13,6 @@ import androidx.compose.ui.*
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.*
-import androidx.compose.ui.graphics.drawscope.Fill
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.tooling.preview.Preview
@@ -24,7 +22,6 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import android.graphics.Path.Direction
-import androidx.compose.ui.geometry.RoundRect
 
 
 /**
@@ -215,10 +212,6 @@ fun TouchCircleProgress(
             )
         }
 
-        val roundRect = RoundRect(
-            rect,
-
-        )
         Path().apply {
             addPath(circlePath)
         }
