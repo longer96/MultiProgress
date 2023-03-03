@@ -8,17 +8,14 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.alg.roundprogress.TouchCircleProgress
+import com.alg.roundprogress.TouchRoundProgress
 import com.longer.composedemo.ui.theme.ComposeDemoTheme
 
 class MainActivity : ComponentActivity() {
@@ -34,12 +31,12 @@ class MainActivity : ComponentActivity() {
 fun Greeting() {
 
     Box(
-        Modifier.fillMaxSize(),
+        Modifier.size(300.dp).background(Color(0x5FEEF4F5)),
         contentAlignment = Alignment.Center,
+        // 圆角
     ) {
-        val size = with(LocalDensity.current) { 500.toDp() }
-        TouchCircleProgress(
-            circleSize = size,
+        TouchRoundProgress(
+            circleSize = 220.dp,
             startProcess = 0f,
             progressWidth = 20.dp,
             touchImgSize = 50.dp,
@@ -59,6 +56,5 @@ fun Greeting() {
 @Preview()
 @Composable
 fun DefaultPreview2() {
-    ComposeDemoTheme {
-    }
+    ComposeDemoTheme {    }
 }

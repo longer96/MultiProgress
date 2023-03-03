@@ -27,14 +27,12 @@ import android.graphics.Path.Direction
 /**
  * @Author: longer
  * @Date: 2023-01-11 20:58
- * @Description: 可触摸的圆形进度条
+ * @Description: 可触摸的圆角进度条
  * @todo:
  * 1. 获取布局约束
- * 2：减少 pathMeasure 计算
- * 3：可以设置角度和形状
  */
 @Composable
-fun TouchCircleProgress(
+fun TouchRoundProgress(
     // 圆形进度条的大小
     circleSize: Dp = Dp.Infinity,
     // 进度条的宽度
@@ -60,8 +58,7 @@ fun TouchCircleProgress(
 ) {
 
     // 触摸点图片大小（touchImgSize 为空，默认为线宽度的1.3倍）
-    var touchImgSizePx: Int
-
+    val touchImgSizePx: Int = touchImgSize?.toPx()?.toInt() ?: (progressWidth.toPx() * 1.3f).toInt()
     // 当前进度 0f- 1f
     val process = remember { mutableStateOf(startProcess) }
 
@@ -72,10 +69,7 @@ fun TouchCircleProgress(
     var regionTouchVerify = false
 
     // 可拖动区域 内外圈
-    val regionCircleList = listOf(
-        Region(),
-        Region()
-    )
+    val regionCircleList = listOf(Region(), Region())
 
     // 触摸事件num,当变动之后，就不在消费事件
     val dragNumber = remember { mutableStateOf(0) }
@@ -86,7 +80,39 @@ fun TouchCircleProgress(
     // 标记是否快结束
     val isNearlyFinish = remember { mutableStateOf(false) }
 
-    getVertyRegion(circleSize, regionCircleList)
+
+    LogUtils.d("circleSize = ${circleSize.toPx()}px")
+    // 设置验证区域大小（可触摸安全范围）
+    setVerityRegion(circleSize, regionCircleList)
+
+
+    // 绘制底部圆
+    val rect = Rect(
+        center = Offset(circleSize.toPx() / 2, circleSize.toPx() / 2),
+        radius = circleSize.toPx() / 2 - Math.max(progressWidth.toPx() / 2, touchImgSizePx / 2f),
+    )
+
+    val startAngle = 0f
+    val circlePath = Path().apply {
+        val sweepAngle = if (direction.value == Direction.CW) 360f else -360f
+        addArc(
+            rect,
+            0f - 90f + startAngle,
+            sweepAngle,
+        )
+    }
+
+    // 通过计算path length画圆
+    val pathMeasure = PathMeasure()
+    pathMeasure.setPath(circlePath, true)
+
+    // 测量出来的path长度
+    val pathLength = pathMeasure.length
+
+    // 获取头部坐标，这里通过转Android的Path，然后获取头部坐标（因为compose的path目前没有api）
+    val pathUtils = PathUtils(circlePath.asAndroidPath())
+
+
 
     Box(
         contentAlignment = Alignment.Center,
@@ -115,15 +141,17 @@ fun TouchCircleProgress(
                     },
                     onDrag = { change, _ ->
                         val offset = change.position
-                        if (!regionTouchVerify) {
-                            LogUtils.d("拖动点 不在触摸区域内，不处理，不在消耗事件")
-                            dragNumber.value++
-                            return@detectDragGestures
-                        }
 
                         // 验证是不是在圆形区域内, 不在就不处理
                         if (!verityCircle(regionCircleList, offset.x, offset.y)) {
                             LogUtils.d("不在触摸区域内，不处理，不在消耗事件")
+                            dragNumber.value++
+                            return@detectDragGestures
+                        }
+
+
+                        if (!regionTouchVerify) {
+                            LogUtils.d("拖动点 不在触摸区域内，不处理，不在消耗事件")
                             dragNumber.value++
                             return@detectDragGestures
                         }
@@ -191,35 +219,8 @@ fun TouchCircleProgress(
                 )
             },
     ) {
-        LogUtils.d("circleSize = ${circleSize.toPx()}px")
 
 
-        // 触摸点图片大小（为空，默认为线宽度的1.3倍）
-        touchImgSizePx = touchImgSize?.toPx()?.toInt() ?: (progressWidth.toPx() * 1.3f).toInt()
-
-        val rect = Rect(
-            center = Offset(circleSize.toPx() / 2, circleSize.toPx() / 2),
-            radius = circleSize.toPx() / 2 - Math.max(progressWidth.toPx() / 2, touchImgSizePx / 2f),
-        )
-
-        val startAngle = 0f
-        val circlePath = Path().apply {
-            val sweepAngle = if (direction.value == Direction.CW) 360f else -360f
-            addArc(
-                rect,
-                0f - 90f + startAngle,
-                sweepAngle,
-            )
-        }
-
-        Path().apply {
-            addPath(circlePath)
-        }
-
-        // 通过计算path length画圆
-        val pathMeasure = PathMeasure()
-        pathMeasure.setPath(circlePath, true)
-        val pathLength = pathMeasure.length
         val newPath = Path()
         pathMeasure.getSegment(0f, pathLength * process.value, newPath, true)
 
@@ -258,14 +259,12 @@ fun TouchCircleProgress(
 //        regionCircleList[1].setPath(verityCirclePathIn.asAndroidPath(), Region(verityRegionRect))
 
 
-        // 获取头部坐标 todo 优化性能
-        val pathUtils = PathUtils.instance
-        pathUtils.setPath(circlePath.asAndroidPath())
+        // 获取头部坐标
         touchPosition = pathUtils.getStartPosition(process.value)
-        LogUtils.d("pos[0] = ${touchPosition[0]}, pos[1] = ${touchPosition[1]}")
+        LogUtils.d("进度条头部坐标点 x = ${touchPosition[0]}, y = ${touchPosition[1]}")
 
 
-        // 设置触摸区域
+        // 设置可触摸区域
         regionTouch.set(
             touchPosition[0].toInt() - touchImgSizePx / 2,
             touchPosition[1].toInt() - touchImgSizePx / 2,
@@ -310,7 +309,7 @@ fun DefaultPreview() {
         Modifier.size(300.dp),
         contentAlignment = Alignment.Center,
     ) {
-        TouchCircleProgress(
+        TouchRoundProgress(
             circleSize = 200.dp,
             startProcess = 0.2f,
             progressWidth = 20.dp,

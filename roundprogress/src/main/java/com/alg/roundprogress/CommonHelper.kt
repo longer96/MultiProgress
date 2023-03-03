@@ -49,9 +49,13 @@ fun getRotate(x1: Double, y1: Double, x2: Double, y2: Double, centerX: Double, c
 
 /**
  * 获取验证区域
+ * @param circleSize 圆的大小
+ * @param regionCircleList 内圈、外圈验证区域
+ * 外圈：放大倍数为半径3倍
+ * 内圈：半径为外圈半径的0.4倍
  */
 @Composable
-fun getVertyRegion(
+fun setVerityRegion(
     circleSize: Dp,
     regionCircleList: List<Region>
 ) {
@@ -96,20 +100,18 @@ fun getVertyRegion(
  * 验证是不是在圆形区域内
  */
 fun verityCircle(regionCircleList: List<Region>, x: Float, y: Float): Boolean {
-    val verity: Boolean
-    if (regionCircleList[0].contains(x.toInt(), y.toInt())) {
+    return if (regionCircleList[0].contains(x.toInt(), y.toInt())) {
         LogUtils.d("外圈区域 >> 通过")
         if (regionCircleList[1].contains(x.toInt(), y.toInt())) {
             LogUtils.d("内圈区域 >> 不通过")
-            verity = false
+            false
         } else {
             LogUtils.d("内圈区域 >> 通过")
-            verity = true
+            true
         }
     } else {
         LogUtils.d("外圈区域 >> 未通过")
-        verity = false
+        false
     }
-    return verity
 
 }
