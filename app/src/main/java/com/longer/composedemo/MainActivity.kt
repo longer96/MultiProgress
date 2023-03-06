@@ -2,6 +2,7 @@ package com.longer.composedemo
 
 import android.graphics.Path
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
@@ -45,6 +46,10 @@ fun Greeting() {
             processColor = Color(0xFF7CC7E2),
             circleBgColor = Color(0xFFEEF4F5),
             onProcessFinish = {
+                Log.d("TAG", "onProcessFinish")
+            },
+            onProcessChange = {
+                Log.d("TAG", "onProcessChange: $it")
             }
         )
         Text(text = stringResource(R.string.app_name), fontSize = 17.sp)

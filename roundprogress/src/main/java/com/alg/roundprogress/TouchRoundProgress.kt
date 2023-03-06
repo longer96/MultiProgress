@@ -54,11 +54,13 @@ fun TouchRoundProgress(
     // 背景颜色
     backgroundColor: Color = Color.Transparent,
     // 完成回调
-    onProcessFinish: () -> Unit = {},
+    onProcessFinish: (() -> Unit)? = null,
+    // 进度回调
+    onProcessChange: ((process: Float) -> Unit)? = null
 ) {
     BoxWithConstraints {
         // 圆形进度条的大小,默认为父布局的最小值
-        var circleSize = circleSize
+        var circleSizeDp = circleSize
 
         // 触摸点图片大小（touchImgSize 为空，默认为线宽度的1.3倍）
         val touchImgSizePx: Int = touchImgSize?.toPx()?.toInt() ?: (progressWidth.toPx() * 1.3f).toInt()
@@ -84,26 +86,26 @@ fun TouchRoundProgress(
         val isNearlyFinish = remember { mutableStateOf(false) }
 
         // 如果没有设置圆形进度条的大小,默认为父布局的最小值
-        if (circleSize.toPx() <= 0) {
-            circleSize = if (maxWidth > maxHeight) maxHeight else maxWidth
+        if (circleSizeDp.toPx() <= 0) {
+            circleSizeDp = if (maxWidth > maxHeight) maxHeight else maxWidth
             LogUtils.d("maxWidth:$maxWidth,maxHeight:$maxHeight")
         }
 
-        LogUtils.d("circleSize = ${circleSize.toPx()}px")
+        LogUtils.d("circleSize = ${circleSizeDp.toPx()}px")
         // 设置验证区域大小（可触摸安全范围）
-        setVerityRegion(circleSize, regionCircleList)
+        setVerityRegion(circleSizeDp, regionCircleList)
 
 
         // 绘制底部圆
-        val radius = circleSize.toPx() / 2 - Math.max(progressWidth.toPx() / 2, touchImgSizePx / 2f)
+        val radius = circleSizeDp.toPx() / 2 - Math.max(progressWidth.toPx() / 2, touchImgSizePx / 2f)
         val rect = Rect(
-            center = Offset(circleSize.toPx() / 2, circleSize.toPx() / 2),
+            center = Offset(circleSizeDp.toPx() / 2, circleSizeDp.toPx() / 2),
             radius = radius,
         )
 
         // 画圆 如果startAngle=0,起始位置默认为12点方向
         val circlePath = Path().apply {
-            val sweepAngle = if (direction.value == Direction.CW) 360f else -360f
+            val sweepAngle = if (direction.value == Direction.CW) 359.99f else -359.99f
             addArc(
                 rect,
                 0f - 90f + startAngle,
@@ -123,7 +125,7 @@ fun TouchRoundProgress(
 
         // 计算得到的头部坐标
         val headPoint = getPoint(
-            p1 = Point((circleSize.toPx() / 2).toInt(), (circleSize.toPx() / 2).toInt()),
+            p1 = Point((circleSizeDp.toPx() / 2).toInt(), (circleSizeDp.toPx() / 2).toInt()),
             radius = radius,
             angle = startAngle.toDouble()
         )
@@ -132,7 +134,7 @@ fun TouchRoundProgress(
         Box(
             contentAlignment = Alignment.Center,
             modifier = Modifier
-                .size(circleSize)
+                .size(circleSizeDp)
                 .background(backgroundColor)
                 .pointerInput(dragNumber.value) {
                     detectDragGestures(
@@ -175,7 +177,7 @@ fun TouchRoundProgress(
 
 
                             var rotateAngle = calculateAngle(
-                                p1 = Point((circleSize.toPx() / 2).toInt(), (circleSize.toPx() / 2).toInt()),
+                                p1 = Point((circleSizeDp.toPx() / 2).toInt(), (circleSizeDp.toPx() / 2).toInt()),
                                 p2 = Point(headPoint.x, headPoint.y),
                                 p3 = Point(offset.x.toInt(), offset.y.toInt()),
                             )
@@ -198,20 +200,22 @@ fun TouchRoundProgress(
                                 LogUtils.d("顺时针 > 补偿之后的角度: $rotateAngle")
                             } else {
                                 // 逆时针
-                                rotateAngle = 360f - getRotate(rotateAngle)
+                                rotateAngle = 359.99f - getRotate(rotateAngle)
                                 LogUtils.d("逆时针 > 补偿之后的角度: $rotateAngle")
                             }
 
-                            process.value = (rotateAngle / 360f).toFloat()
+                            process.value = (rotateAngle / 359.99f).toFloat()
                             LogUtils.d(">>  当前进度 process: ${process.value}")
+                            onProcessChange?.invoke(process.value)
 
                             // 有时候拉的太快会监听不到，优化进度监听
                             // 进度超过75%，记录一下，如果之后进度小于25%就算通过
                             // 如果低于75%，也记录，清除快完成的标记
                             if (process.value < 0.25f && isNearlyFinish.value) {
                                 LogUtils.d("拖动完成 >>> ")
+                                onProcessChange?.invoke(1f)
                                 dragNumber.value++
-                                onProcessFinish()
+                                onProcessFinish?.invoke()
                                 isNearlyFinish.value = false
                                 return@detectDragGestures
                             }
@@ -282,7 +286,7 @@ fun TouchRoundProgress(
             )
 
 
-            Canvas(modifier = Modifier.size(circleSize)) {
+            Canvas(modifier = Modifier.size(circleSizeDp)) {
                 LogUtils.d("canvas size = $size")
 
                 // 背景圆
