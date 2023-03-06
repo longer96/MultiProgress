@@ -22,6 +22,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import android.graphics.Path.Direction
+import android.graphics.Point
 
 
 /**
@@ -43,8 +44,8 @@ fun TouchRoundProgress(
     processColor: Color = Color(0xFF00BFFF),
     // 进度条的进度
     startProcess: Float = 0f,
-    // 开始角度 todo 暂时不支持，因为滑动的时候不好计算，目前都以12点方向为起始点
-//    startAngle: Float = 0f,
+    // 开始角度
+    startAngle: Float = 0f,
     // 触摸点图片大小（为空，默认为线宽度的1.3倍）
     touchImgSize: Dp? = null,
     // 触摸点图片
@@ -87,12 +88,13 @@ fun TouchRoundProgress(
 
 
     // 绘制底部圆
+    val radius = circleSize.toPx() / 2 - Math.max(progressWidth.toPx() / 2, touchImgSizePx / 2f)
     val rect = Rect(
         center = Offset(circleSize.toPx() / 2, circleSize.toPx() / 2),
-        radius = circleSize.toPx() / 2 - Math.max(progressWidth.toPx() / 2, touchImgSizePx / 2f),
+        radius = radius,
     )
 
-    val startAngle = 0f
+    // 画圆 如果startAngle=0,起始位置默认为12点方向
     val circlePath = Path().apply {
         val sweepAngle = if (direction.value == Direction.CW) 360f else -360f
         addArc(
@@ -112,6 +114,12 @@ fun TouchRoundProgress(
     // 获取头部坐标，这里通过转Android的Path，然后获取头部坐标（因为compose的path目前没有api）
     val pathUtils = PathUtils(circlePath.asAndroidPath())
 
+    // 计算得到的头部坐标
+    val headPoint = getPoint(
+        p1 = Point((circleSize.toPx() / 2).toInt(), (circleSize.toPx() / 2).toInt()),
+        radius = radius,
+        angle = startAngle.toDouble()
+    )
 
 
     Box(
@@ -158,42 +166,36 @@ fun TouchRoundProgress(
 
                         LogUtils.d(">>  detectTapGestures: $offset")
 
-                        // 设置时针方向
+
+                        var rotateAngle = calculateAngle(
+                            p1 = Point((circleSize.toPx() / 2).toInt(), (circleSize.toPx() / 2).toInt()),
+                            p2 = Point(headPoint.x, headPoint.y),
+                            p3 = Point(offset.x.toInt(), offset.y.toInt()),
+                        )
+                        LogUtils.d("得到的角度: $rotateAngle")
+
                         if (process.value < 0.2f) {
-                            if (offset.x >= circleSize.toPx() / 2) {
-                                direction.value = Direction.CW
+                            if (rotateAngle >= 0f) {
+                                // 顺时针
+                                if (direction.value != Direction.CW) direction.value = Direction.CW
                             } else {
-                                direction.value = Direction.CCW
+                                // 逆时针
+                                if (direction.value != Direction.CCW) direction.value = Direction.CCW
                             }
                         }
 
-
-                        var rotateAngle = getRotate(
-                            x1 = offset.x.toDouble(),
-                            y1 = offset.y.toDouble(),
-                            x2 = (circleSize.toPx() / 2).toDouble(),
-                            y2 = 0.0,
-                            centerX = (circleSize.toPx() / 2).toDouble(),
-                            centerY = (circleSize.toPx() / 2).toDouble()
-                        )
-
-                        LogUtils.d("得到的角度: $rotateAngle")
 
                         if (direction.value == Direction.CW) {
                             // 顺时针
-                            if (offset.x < circleSize.toPx() / 2) {
-                                rotateAngle = 180f - rotateAngle + 180f
-                                LogUtils.d("顺时针 > 补偿180度之后: $rotateAngle")
-                            }
+                            rotateAngle = getRotate(rotateAngle)
+                            LogUtils.d("顺时针 > 补偿之后的角度: $rotateAngle")
                         } else {
                             // 逆时针
-                            if (offset.x > circleSize.toPx() / 2) {
-                                rotateAngle = 180f - rotateAngle + 180f
-                                LogUtils.d("逆时针 > 补偿180度之后: $rotateAngle")
-                            }
+                            rotateAngle = 360f - getRotate(rotateAngle)
+                            LogUtils.d("逆时针 > 补偿之后的角度: $rotateAngle")
                         }
-                        process.value = (rotateAngle / 360f).toFloat()
 
+                        process.value = (rotateAngle / 360f).toFloat()
                         LogUtils.d(">>  当前进度 process: ${process.value}")
 
                         // 有时候拉的太快会监听不到，优化进度监听
@@ -312,6 +314,7 @@ fun DefaultPreview() {
         TouchRoundProgress(
             circleSize = 200.dp,
             startProcess = 0.2f,
+            startAngle = 90f,
             progressWidth = 20.dp,
             touchImgSize = 42.dp,
             startDirection = Direction.CCW,

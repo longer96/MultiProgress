@@ -31,13 +31,14 @@ class MainActivity : ComponentActivity() {
 fun Greeting() {
 
     Box(
-        Modifier.size(300.dp).background(Color(0x5FEEF4F5)),
+        Modifier.size(360.dp).background(Color(0x8FEEF4F5)),
         contentAlignment = Alignment.Center,
         // 圆角
     ) {
         TouchRoundProgress(
             circleSize = 220.dp,
-            startProcess = 0f,
+            startProcess = 0.18f,
+            startAngle = -90f,
             progressWidth = 20.dp,
             touchImgSize = 50.dp,
             startDirection = Path.Direction.CW,

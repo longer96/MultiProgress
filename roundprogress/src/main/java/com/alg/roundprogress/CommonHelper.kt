@@ -1,5 +1,6 @@
 package com.alg.roundprogress
 
+import android.graphics.Point
 import android.graphics.Region
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.geometry.Offset
@@ -15,35 +16,37 @@ internal fun Dp.toPx(): Float {
     return this.value * LocalDensity.current.density
 }
 
-
 /**
- * 传入一个触摸点的坐标，以及圆心的坐标，返回一个角度
- * 可以设置起始角度  todo 可以设置角度
+ * 方法接收三个 Point 类型的参数，代表三个点的坐标。方法内部首先使用 atan2 函数计算出第一个点和第二个点之间的线段与水平方向的夹角，
+ * 再计算出第一个点和第三个点之间的线段与水平方向的夹角。两个角度的差即为第三个点与线段之间的夹角。
+ * 最后需要注意，如果夹角大于180度，则需要减去360度，如果夹角小于等于-180度，
+ * 则需要加上360度，以确保夹角落在-180度到180度之间，同时也支持钝角的计算。
+ * @param p1 线段起点
+ * @param p2 线段终点
+ * @param p3 需要计算的点
+ * @return -180 ~ 180
  */
-/**
- * 算出该点与水平的角度的值，用移动点角度减去起始点角度就是旋转角度。
- */
-fun getRotate(x1: Double, y1: Double, x2: Double, y2: Double, centerX: Double, centerY: Double): Double {
-//    LogUtils.d("x1=$x1,y1=$y1,x2=$x2,y2=$y2,centerX=$centerX,centerY=$centerY")
-    val abx: Double = centerX - x1
-    val aby: Double = centerY - y1
-    val acx: Double = centerX - x2
-    val acy: Double = centerY - y2
-    val bcx = x2 - x1
-    val bcy = y2 - y1
-    val c = Math.hypot(abx, aby)
-    val b = Math.hypot(acx, acy)
-    val a = Math.hypot(bcx, bcy)
-    var cos1 = (c * c + b * b - a * a) / (2 * b * c)
-//    LogUtils.i("c == $c")
-//    LogUtils.i("b == $b")
-//    LogUtils.i("a == $a")
-//    LogUtils.i("cos == $cos1")
-    if (cos1 >= 1) {
-        cos1 = 1.0
+fun calculateAngle(p1: Point, p2: Point, p3: Point): Double {
+    val angle1 = Math.atan2((p2.y - p1.y).toDouble(), (p2.x - p1.x).toDouble())
+    val angle2 = Math.atan2((p3.y - p1.y).toDouble(), (p3.x - p1.x).toDouble())
+    var angle = angle2 - angle1
+    if (angle > Math.PI) {
+        angle -= 2 * Math.PI
+    } else if (angle <= -Math.PI) {
+        angle += 2 * Math.PI
     }
-    val radian = Math.acos(cos1)
-    return Math.toDegrees(radian)
+    // Convert to degrees
+    return angle * 180 / Math.PI
+}
+
+fun getRotate(angle: Double): Double {
+    var mAngle = angle
+    if (mAngle > 180) {
+        mAngle = 360 - mAngle
+    } else if (mAngle < 0) {
+        mAngle += 360
+    }
+    return mAngle
 }
 
 
@@ -114,4 +117,29 @@ fun verityCircle(regionCircleList: List<Region>, x: Float, y: Float): Boolean {
         false
     }
 
+}
+
+
+/**
+ * 给定一个圆和一个角度，计算出圆上的点
+ * @param p1: Point 圆心
+ * @param radius: Double 半径
+ * @param angle 角度
+ * @return 圆上的点
+ */
+fun getPoint(p1: Point, radius: Float, angle: Double): Point {
+    val centerX = p1.x // 圆心X坐标
+    val centerY = p1.y // 圆心Y坐标
+
+    // 计算起始角度，即12点钟方向的角度
+    val startAngle = -Math.PI / 2
+
+    // 将角度转换为弧度
+    val radians = Math.toRadians(angle)
+
+    // 计算点的坐标
+    val x = centerX + radius * Math.cos(startAngle + radians)
+    val y = centerY + radius * Math.sin(startAngle + radians)
+
+    return Point(x.toInt(), y.toInt())
 }

@@ -17,7 +17,7 @@ public class Test {
      * @param p1
      * @param p2
      * @param p3
-     * @return
+     * @return -180 ~ 180
      */
     public static double calculateAngle(Point p1, Point p2, Point p3) {
         double angle1 = Math.atan2(p2.y - p1.y, p2.x - p1.x);
@@ -29,9 +29,7 @@ public class Test {
             angle += 2 * Math.PI;
         }
         // Convert to degrees
-        angle = angle * 180 / Math.PI;
-
-        return angle;
+        return angle * 180 / Math.PI;
     }
 
     public static class Point {
@@ -44,11 +42,58 @@ public class Test {
         }
     }
 
+    /**
+     * 以12点钟方向为起始角度，给定一个圆和一个角度，计算出该角度在圆上的点
+     * @param p1: Point 圆心
+     * @param radius: Double 半径
+     * @param angle 角度
+     * @return 圆上的点
+     */
+    public static Point calculatePoint(Point p1, double radius, double angle) {
+        double radians = Math.toRadians(angle);
+        double x = p1.x + radius * Math.cos(radians);
+        double y = p1.y + radius * Math.sin(radians);
+        return new Point(x, y);
+    }
+
+
+
 
     public static void main(String[] args) {
+//        calculateAngleTest();
+        calculatePointTest();
+    }
+
+    /**
+     * 给定一个圆和一个角度，计算出圆上的点
+     * @param : Point 圆心
+     * @param : Double 半径
+     * @param : 角度
+     * @return 圆上的点
+     */
+    private static void calculatePointTest() {
+        double centerX = 10;  // 圆心X坐标
+        double centerY = 10;  // 圆心Y坐标
+        double radius = 10;  // 圆半径
+        double angle = 270;   // 角度，单位为度
+
+        // 计算起始角度，即12点钟方向的角度
+        double startAngle = -Math.PI / 2;
+
+        // 将角度转换为弧度
+        double radians = Math.toRadians(angle);
+
+        // 计算点的坐标
+        double x = centerX + radius * Math.cos(startAngle + radians);
+        double y = centerY + radius * Math.sin(startAngle + radians);
+
+        System.out.println("Point on the circle: (" + x + ", " + y + ")");
+    }
+
+    private static void calculateAngleTest() {
         Point point1 = new Point(1, 1);
         Point point2 = new Point(1, 0);
-        Point point3 = new Point(2, 0);
+        Point point3 = new Point(0.9, 2);
 
         double angle = calculateAngle(point1, point2, point3);
 

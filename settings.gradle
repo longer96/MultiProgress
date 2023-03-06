@@ -12,6 +12,6 @@ dependencyResolutionManagement {
         mavenCentral()
     }
 }
-rootProject.name = "TouchRoundProgress"
+rootProject.name = "TouchCircleProgress"
 include ':app'
 include ':roundprogress'
