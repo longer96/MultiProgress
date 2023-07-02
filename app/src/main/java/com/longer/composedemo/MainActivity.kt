@@ -30,7 +30,6 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun Greeting() {
-
     Box(
         Modifier.size(360.dp).background(Color(0x8FEEF4F5)),
         contentAlignment = Alignment.Center,
@@ -54,8 +53,6 @@ fun Greeting() {
         )
         Text(text = stringResource(R.string.app_name), fontSize = 17.sp)
     }
-
-
 }
 
 

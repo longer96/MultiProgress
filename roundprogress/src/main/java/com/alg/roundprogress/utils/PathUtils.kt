@@ -1,4 +1,4 @@
-package com.alg.roundprogress
+package com.alg.roundprogress.utils
 
 import android.graphics.Path
 import android.graphics.PathMeasure

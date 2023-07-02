@@ -1,29 +1,40 @@
 package com.alg.roundprogress
 
+import android.graphics.Path.Direction
+import android.graphics.Point
 import android.graphics.Region
+import android.util.Log
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.size
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.ui.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
-import androidx.compose.ui.graphics.*
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.PathMeasure
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.asAndroidPath
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.res.imageResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
-import android.graphics.Path.Direction
-import android.graphics.Point
-import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.alg.roundprogress.utils.LogUtils
+import com.alg.roundprogress.utils.PathUtils
 
 
 /**
@@ -48,7 +59,7 @@ fun TouchRoundProgress(
     // 触摸点图片大小（为空，默认为线宽度的1.3倍）
     touchImgSize: Dp? = null,
     // 触摸点图片
-    circleTouchImage: ImageBitmap = ImageBitmap.imageResource(R.drawable.ic_verify_anchor_default),
+    circleTouchImage: ImageBitmap = ImageBitmap.imageResource(R.drawable.widget_verify_anchor_default),
     // 时针方向
     startDirection: Direction = Direction.CW,
     // 背景颜色
@@ -140,12 +151,12 @@ fun TouchRoundProgress(
                     detectDragGestures(
                         onDragStart = { offset ->
                             LogUtils.d(">>  onDragStart  regionTouch >> $regionTouch")
-                            if (!regionTouch.contains(offset.x.toInt(), offset.y.toInt())) {
+                            regionTouchVerify = if (!regionTouch.contains(offset.x.toInt(), offset.y.toInt())) {
                                 LogUtils.d(">>  detectTapGestures: 不在区域内")
-                                regionTouchVerify = false
+                                false
                             } else {
                                 LogUtils.d(">>  detectTapGestures: 在区域内")
-                                regionTouchVerify = true
+                                true
                             }
                         },
                         onDragEnd = {
@@ -321,18 +332,44 @@ fun TouchRoundProgress(
 @Composable
 fun DefaultPreview() {
     Box(
-        Modifier.size(200.dp),
+        Modifier.size(220.dp),
         contentAlignment = Alignment.Center,
     ) {
         TouchRoundProgress(
             startProcess = 0.2f,
-            startAngle = 90f,
             progressWidth = 20.dp,
             touchImgSize = 42.dp,
-            startDirection = Direction.CCW,
+            startDirection = Direction.CW,
             onProcessFinish = {
                 LogUtils.d("onProcessFinish")
             }
         )
+    }
+}
+
+@Preview()
+@Composable
+fun DefaultPreview2() {
+    Box(
+        Modifier.size(220.dp),
+        contentAlignment = Alignment.Center,
+        // 圆角
+    ) {
+        TouchRoundProgress(
+            startProcess = 0.18f,
+            startAngle = -90f,
+            progressWidth = 20.dp,
+            touchImgSize = 50.dp,
+            startDirection = Direction.CW,
+            processColor = Color(0xFF7CC7E2),
+            circleBgColor = Color(0xFFEEF4F5),
+            onProcessFinish = {
+                Log.d("TAG", "onProcessFinish")
+            },
+            onProcessChange = {
+                Log.d("TAG", "onProcessChange: $it")
+            }
+        )
+        Text(text = "画一圈", fontSize = 17.sp, color = Color.White)
     }
 }

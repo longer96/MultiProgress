@@ -1,4 +1,4 @@
-package com.alg.roundprogress
+package com.alg.roundprogress.utils
 
 /**
  * @Author: longer
@@ -9,7 +9,7 @@ object LogUtils {
 
     private const val TAG = "TouchPathProgress"
 
-    private var DEBUG = true
+    private var DEBUG = false
 
     fun setDebug(debug: Boolean) {
         DEBUG = debug
